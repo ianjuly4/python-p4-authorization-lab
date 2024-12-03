@@ -96,7 +96,10 @@ class MemberOnlyIndex(Resource):
       
         articles = Article.query.filter_by(is_member_only=True).all()
         articles_data = [article.to_dict() for article in articles] 
-        return articles_data, 200
+        return make_response(
+            articles_data, 
+            200
+        )
 
 class MemberOnlyArticle(Resource):
 
@@ -108,8 +111,11 @@ class MemberOnlyArticle(Resource):
         article = Article.query.filter_by(id=id, is_member_only=True).first()
         if article is None:
             return {'error': 'Article not found'}, 404
-
-        return article.to_dict(), 200
+        article_dict=article.to_dict()
+        return make_response(
+            article_dict,
+            200
+        )
 
 api.add_resource(ClearSession, '/clear', endpoint='clear')
 api.add_resource(IndexArticle, '/articles', endpoint='article_list')
