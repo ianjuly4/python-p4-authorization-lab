@@ -18,6 +18,8 @@ db.init_app(app)
 
 api = Api(app)
 
+
+
 class ClearSession(Resource):
 
     def delete(self):
@@ -83,16 +85,31 @@ class CheckSession(Resource):
             return user.to_dict(), 200
         
         return {}, 401
-
-class MemberOnlyIndex(Resource):
     
+class MemberOnlyIndex(Resource):
+
     def get(self):
-        pass
+        user_id = session.get('user_id')
+        if not user_id:
+            return {'error': 'Unauthorized'}, 401
+
+      
+        articles = Article.query.filter_by(is_member_only=True).all()
+        articles_data = [article.to_dict() for article in articles] 
+        return articles_data, 200
 
 class MemberOnlyArticle(Resource):
-    
+
     def get(self, id):
-        pass
+        user_id = session.get('user_id')
+        if not user_id:
+            return {'error': 'Unauthorized'}, 401
+
+        article = Article.query.filter_by(id=id, is_member_only=True).first()
+        if article is None:
+            return {'error': 'Article not found'}, 404
+
+        return article.to_dict(), 200
 
 api.add_resource(ClearSession, '/clear', endpoint='clear')
 api.add_resource(IndexArticle, '/articles', endpoint='article_list')
